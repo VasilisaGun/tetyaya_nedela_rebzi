@@ -5,12 +5,12 @@ import com.example.personalaccount.util.GradeUtils
 
 class GradeRapository {
     private val grades = mutableListOf<Grade>()
-    private val nextId = 1L
+    private var nextId = 1L
     fun getALL(): List<Grade> = grades.toList()
     fun getByCourse(courseName: String): List<Grade> =
         grades.filter { it.courseName == courseName }
     fun add(courseName: String, score: Int, date: java.util.Date, type: String): Grade{
-        val grade = Grade(nextId++, courseName, score, date, type)
+        val grade = Grade(nextId++, courseName, score, date)
         grades.add(grade)
         return grade
     }

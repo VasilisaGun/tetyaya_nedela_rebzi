@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://android.com"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Кнопка Назад -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="fitCenter"
+        android:padding="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Назад"
+        android:src="@drawable/arrow_left" />
+
+
+
+
+    <!-- Заголовок экрана -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:text="Добавить дисциплину"
+        android:textColor="@color/pink_accent"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <!-- Поле: Название -->
+    <EditText
+        android:id="@+id/etCourseName"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_pink_rounded"
+        android:gravity="center"
+        android:hint="Название"
+        android:inputType="textCapSentences"
+        android:textColor="@color/dark_bg"
+        android:textColorHint="@color/dark_bg"
+        android:textStyle="bold" />
+
+    <!-- Поле: Преподаватель -->
+    <EditText
+        android:id="@+id/etTeacherName"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="28dp"
+        android:background="@drawable/bg_pink_rounded"
+        android:gravity="center"
+        android:hint="Преподаватель"
+        android:inputType="textPersonName|textCapWords"
+        android:textColor="@color/dark_bg"
+        android:textColorHint="@color/dark_bg"
+        android:textStyle="bold" />
+
+    <!-- Кнопка: Добавить дисциплину -->
+    <Button
+        android:id="@+id/btnSaveCourse"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginBottom="28dp"
+        android:backgroundTint="@color/pink_accent"
+        android:text="Добавить дисциплину"
+        android:textAllCaps="false"
+        android:textColor="@color/dark_bg"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Список добавленных дисциплин -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/llCoursesList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+</LinearLayout>
