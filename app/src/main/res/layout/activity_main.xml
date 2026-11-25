@@ -32,7 +32,7 @@
     <Button
         android:id="@+id/btnAddCourse"
         style="@style/MenuButtonStyle"
-        android:text="Добавить дисциплину" />
+        android:text="Добавление дисциплины" />
 
     <Button
         android:id="@+id/btnDynamics"

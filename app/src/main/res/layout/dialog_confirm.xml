@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:background="@drawable/bg_dialog_card"
+android:orientation="vertical"
+android:paddingStart="24dp"
+android:paddingTop="28dp"
+android:paddingEnd="24dp"
+android:paddingBottom="24dp">
+
+<TextView
+    android:id="@+id/tvConfirmTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginBottom="32dp"
+    android:text="Удалить?"
+    android:textColor="@color/dark_bg"
+    android:textSize="22sp"
+    android:textStyle="bold" />
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnConfirmCancel"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="12dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_dialog_btn"
+        android:text="Отмена"
+        android:textAllCaps="false"
+        android:textColor="@color/pink_accent"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnConfirmYes"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_dialog_btn"
+        android:text="Удалить"
+        android:textAllCaps="false"
+        android:textColor="@color/pink_accent"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</LinearLayout>
+
+</LinearLayout>

@@ -40,6 +40,19 @@ class MainActivity : AppCompatActivity() {
             val intent = android.content.Intent(this, AddCourseActivity::class.java)
             startActivity(intent)
         }
+        btnCourses.setOnClickListener {
+            val intent = android.content.Intent(this, CoursesActivity::class.java)
+            intent.putExtra("IS_ADD_MODE", false) // Только просмотр
+            startActivity(intent)
+        }
+
+        btnAddGrade.setOnClickListener {
+            val intent = android.content.Intent(this, CoursesActivity::class.java)
+            intent.putExtra("IS_ADD_MODE", true) // Режим добавления оценки
+            startActivity(intent)
+        }
+
+
 
 
     }

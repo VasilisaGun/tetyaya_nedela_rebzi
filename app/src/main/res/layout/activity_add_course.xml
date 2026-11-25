@@ -26,11 +26,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="24dp"
         android:text="Добавить дисциплину"
         android:textColor="@color/pink_accent"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <!-- Поле: Название -->
@@ -78,12 +79,13 @@
         android:textAllCaps="false"
         android:textColor="@color/dark_bg"
         android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"/>
 
     <!-- Список добавленных дисциплин -->
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        style="@style/RatingsButtonStyle"
+        android:layout_width="400dp"
+        android:layout_height="500dp"
         android:layout_weight="1">
 
         <LinearLayout
