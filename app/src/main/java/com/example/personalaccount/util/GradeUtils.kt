@@ -1,6 +1,6 @@
 package com.example.personalaccount.util
     // импорт grade в котором будет использоваться то что мы вводим в максимум иминимум
-import com.example.personalaccount.data.model.Grade
+import com.example.personalaccount.data.db.Grade
     // Задаётся минимум и максимум в возможных оценках.
     // в будущем мы будем использовать эту функцию, но в других файлах
 object GradeUtils {
@@ -9,7 +9,7 @@ object GradeUtils {
 
     fun averageScore(grades: List<Grade>): Double? {
         if (grades.isEmpty()) return null
-        return grades.map { it.score }.average()
+        return grades.map { it.value }.average()
     }
     // тут задаются цифры после запятой, но в нашем случае после точки
     fun formatAverage(avg: Double?): String {

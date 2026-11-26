@@ -8,14 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.personalaccount.data.repository.GradeRapository
 import com.example.personalaccount.util.GradeUtils
 import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
     // Подключаем ваш репозиторий
-    private val repository = GradeRapository()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
