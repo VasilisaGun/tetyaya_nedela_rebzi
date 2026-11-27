@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:background="@drawable/bg_dialog_card"
+android:orientation="vertical"
+android:padding="16dp">
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginBottom="12dp"
+    android:text="Выберите дату"
+    android:textColor="@color/dark_bg"
+    android:textSize="18sp"
+    android:textStyle="bold" />
+
+<!-- Сам календарь на тёмном фоне -->
+<CalendarView
+    android:id="@+id/customCalendarView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dark_square"
+    android:dateTextAppearance="@style/CalendarDateText"
+    android:weekDayTextAppearance="@style/CalendarWeekDayText" />
+
+<!-- Кнопки Отмена и Выбрать -->
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnCalCancel"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_dialog_btn"
+        android:text="Отмена"
+        android:textAllCaps="false"
+        android:textColor="@color/pink_accent"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnCalOk"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_dialog_btn"
+        android:text="Выбрать"
+        android:textAllCaps="false"
+        android:textColor="@color/pink_accent"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</LinearLayout>
+
+</LinearLayout>

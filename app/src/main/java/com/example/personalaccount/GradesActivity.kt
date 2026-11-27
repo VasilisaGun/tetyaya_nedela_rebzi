@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -24,8 +25,9 @@ class GradesActivity : AppCompatActivity() {
         NEWEST, OLDEST, ASCENDING, DESCENDING
     }
 
-
     private var currentSortOrder = SortOrder.NEWEST
+    private var filterDate: String? = null
+    private var filterWorkType: String? = null
 
     private lateinit var db: AppDatabase
     private var disciplineId: Int = -1
@@ -33,8 +35,7 @@ class GradesActivity : AppCompatActivity() {
     private lateinit var tvAvg: TextView
     private lateinit var tvEmpty: TextView
 
-    private val workTypes =
-        arrayOf("Контрольная", "Практическая", "Лабораторная", "Ответ на паре", "Экзамен/Зачёт")
+    private val workTypes = arrayOf("Контрольная", "Практическая", "Лабораторная", "Ответ на паре", "Экзамен/Зачёт")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +60,7 @@ class GradesActivity : AppCompatActivity() {
         tvEmpty = findViewById(R.id.tvEmptyGrades)
 
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<ImageButton>(R.id.btnFilter).setOnClickListener { showFilterDialog() }
         findViewById<ImageButton>(R.id.btnSort).setOnClickListener { showSortDialog() }
 
         val isAddMode = intent.getBooleanExtra("IS_ADD_MODE", false)
@@ -81,40 +83,48 @@ class GradesActivity : AppCompatActivity() {
             val rawGrades = db.appDao().getGradesForDiscipline(disciplineId)
             val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
 
+            val filteredGrades = rawGrades.filter { grade ->
+                val matchesDate = filterDate == null || grade.date == filterDate
+                val matchesType = filterWorkType == null || grade.workType == filterWorkType
+                matchesDate && matchesType
+            }
+
             val grades = when (currentSortOrder) {
-                SortOrder.NEWEST -> rawGrades.sortedWith(
+                SortOrder.NEWEST -> filteredGrades.sortedWith(
                     compareByDescending<Grade> { parseDateMillis(it.date, dateFormat) }
                         .thenByDescending { it.id }
                 )
-                SortOrder.OLDEST -> rawGrades.sortedWith(
+                SortOrder.OLDEST -> filteredGrades.sortedWith(
                     compareBy<Grade> { parseDateMillis(it.date, dateFormat) }
                         .thenBy { it.id }
                 )
-                SortOrder.ASCENDING -> rawGrades.sortedWith(
+                SortOrder.ASCENDING -> filteredGrades.sortedWith(
                     compareBy<Grade> { it.value }
                         .thenByDescending { it.id }
                 )
-                SortOrder.DESCENDING -> rawGrades.sortedWith(
+                SortOrder.DESCENDING -> filteredGrades.sortedWith(
                     compareByDescending<Grade> { it.value }
                         .thenByDescending { it.id }
                 )
             }
 
-
             gridGrades.removeAllViews()
 
             if (grades.isEmpty()) {
+                tvEmpty.text = if (filterDate != null || filterWorkType != null) {
+                    "По выбранному фильтру оценок нет."
+                } else {
+                    "Оценок по этой дисциплине пока нет."
+                }
                 tvEmpty.visibility = View.VISIBLE
                 tvAvg.text = "—"
                 return@launch
             }
             tvEmpty.visibility = View.GONE
 
-            // Расчёт среднего балла
             val avg = grades.map { it.value }.average()
             tvAvg.text = String.format(Locale.US, "%.2f", avg)
 
-            // Отрисовка плиток с оценками
             val sizePx = (56 * resources.displayMetrics.density).toInt()
             val marginPx = (6 * resources.displayMetrics.density).toInt()
 
@@ -146,6 +156,103 @@ class GradesActivity : AppCompatActivity() {
         } catch (e: Exception) {
             0L
         }
+    }
+
+    private fun showCustomDatePicker(initialDateStr: String?, onDateSelected: (String) -> Unit) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_custom_calendar, null)
+        val calendarView = dialogView.findViewById<CalendarView>(R.id.customCalendarView)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnCalCancel)
+        val btnOk = dialogView.findViewById<Button>(R.id.btnCalOk)
+
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+
+        if (!initialDateStr.isNullOrBlank()) {
+            try {
+                val parsed = dateFormat.parse(initialDateStr)
+                if (parsed != null) calendar.time = parsed
+            } catch (_: Exception) {}
+        }
+
+        calendarView.date = calendar.timeInMillis
+        var tempSelectedDate = dateFormat.format(calendar.time)
+
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            tempSelectedDate = String.format(Locale.getDefault(), "%02d.%02d.%04d", dayOfMonth, month + 1, year)
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnOk.setOnClickListener {
+            onDateSelected(tempSelectedDate)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showFilterDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_filter_grades, null)
+
+        val spinnerType = dialogView.findViewById<Spinner>(R.id.spinnerFilterType)
+        val etDate = dialogView.findViewById<EditText>(R.id.etFilterDate)
+        val btnReset = dialogView.findViewById<Button>(R.id.btnFilterReset)
+        val btnApply = dialogView.findViewById<Button>(R.id.btnFilterApply)
+
+        val filterTypes = arrayOf("Все типы") + workTypes
+        val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, filterTypes) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val tv = super.getView(position, convertView, parent) as TextView
+                tv.setTextColor(ContextCompat.getColor(context, R.color.pink_accent))
+                tv.gravity = Gravity.CENTER
+                tv.textSize = 16f
+                tv.setTypeface(null, android.graphics.Typeface.BOLD)
+                return tv
+            }
+        }
+        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
+        spinnerType.adapter = adapter
+
+        if (filterWorkType != null) {
+            val idx = filterTypes.indexOf(filterWorkType)
+            if (idx >= 0) spinnerType.setSelection(idx)
+        }
+
+        var selectedDateTemp: String? = filterDate
+        etDate.setText(selectedDateTemp ?: "")
+
+        etDate.setOnClickListener {
+            showCustomDatePicker(selectedDateTemp) { formatted ->
+                selectedDateTemp = formatted
+                etDate.setText(formatted)
+            }
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnReset.setOnClickListener {
+            filterDate = null
+            filterWorkType = null
+            loadGrades()
+            dialog.dismiss()
+        }
+
+        btnApply.setOnClickListener {
+            val chosenType = spinnerType.selectedItem.toString()
+            filterWorkType = if (chosenType == "Все типы") null else chosenType
+            filterDate = selectedDateTemp?.takeIf { it.isNotBlank() }
+            loadGrades()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showSortDialog() {
@@ -205,8 +312,6 @@ class GradesActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
-    // Окно просмотра деталей, редактирования и удаления
     private fun showGradeActionsDialog(grade: Grade) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_grade_actions, null)
 
@@ -268,7 +373,7 @@ class GradesActivity : AppCompatActivity() {
 
         dialog.show()
     }
-    // Форма создания и редактирования оценки с валидацией
+
     private fun showGradeFormDialog(existingGrade: Grade?) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_grade_form, null)
         val etValue = dialogView.findViewById<EditText>(R.id.etGradeValue)
@@ -279,7 +384,7 @@ class GradesActivity : AppCompatActivity() {
         val btnSave = dialogView.findViewById<Button>(R.id.btnDialogSave)
 
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, workTypes) {
-            override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                 val tv = super.getView(position, convertView, parent) as TextView
                 tv.setTextColor(ContextCompat.getColor(context, R.color.pink_accent))
                 tv.gravity = Gravity.CENTER
@@ -300,6 +405,14 @@ class GradesActivity : AppCompatActivity() {
         } else {
             val today = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
             etDate.setText(today)
+        }
+
+        etDate.isFocusable = false
+        etDate.isClickable = true
+        etDate.setOnClickListener {
+            showCustomDatePicker(etDate.text.toString()) { formatted ->
+                etDate.setText(formatted)
+            }
         }
 
         val dialog = AlertDialog.Builder(this)
@@ -355,6 +468,4 @@ class GradesActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
 }
-// Форма создания и редактирования оценки с валидацией

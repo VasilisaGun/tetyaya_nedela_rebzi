@@ -32,8 +32,15 @@
         <item name="android:textColor">@color/dark_bg</item>
         <item name="cornerRadius">11dp</item>
     </style>
+    <style name="CalendarDateText" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/pink_accent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
-
+    <style name="CalendarWeekDayText" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/pink_accent</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 
     <style name="Theme.PersonalAccount" parent="Base.Theme.PersonalAccount" />
 </resources>
