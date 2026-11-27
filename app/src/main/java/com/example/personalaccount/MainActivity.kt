@@ -34,7 +34,9 @@ class MainActivity : AppCompatActivity() {
         val btnAddCourse = findViewById<Button>(R.id.btnAddCourse)
         val btnDynamics = findViewById<Button>(R.id.btnDynamics)
 
-// Переход на экран добавления дисциплины
+
+
+// Переход на экраны
         btnAddCourse.setOnClickListener {
             val intent = android.content.Intent(this, AddCourseActivity::class.java)
             startActivity(intent)
@@ -51,6 +53,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        btnDynamics.setOnClickListener {
+            val intent = android.content.Intent(this, CalculatorActivity::class.java)
+            startActivity(intent)
+        }
 
 
 
