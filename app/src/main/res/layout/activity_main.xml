@@ -37,6 +37,6 @@
     <Button
         android:id="@+id/btnDynamics"
         style="@style/MenuButtonStyle"
-        android:text="Динамика" />
+        android:text="Калькулятор" />
 
 </LinearLayout>

@@ -20,13 +20,21 @@ import java.util.*
 
 class GradesActivity : AppCompatActivity() {
 
+    private enum class SortOrder {
+        NEWEST, OLDEST, ASCENDING, DESCENDING
+    }
+
+
+    private var currentSortOrder = SortOrder.NEWEST
+
     private lateinit var db: AppDatabase
     private var disciplineId: Int = -1
     private lateinit var gridGrades: GridLayout
     private lateinit var tvAvg: TextView
     private lateinit var tvEmpty: TextView
 
-    private val workTypes = arrayOf("Контрольная", "Практическая", "Лабораторная", "Ответ на паре", "Экзамен/Зачёт")
+    private val workTypes =
+        arrayOf("Контрольная", "Практическая", "Лабораторная", "Ответ на паре", "Экзамен/Зачёт")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +59,8 @@ class GradesActivity : AppCompatActivity() {
         tvEmpty = findViewById(R.id.tvEmptyGrades)
 
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<ImageButton>(R.id.btnSort).setOnClickListener { showSortDialog() }
+
         val isAddMode = intent.getBooleanExtra("IS_ADD_MODE", false)
         val btnAddGrade = findViewById<Button>(R.id.btnOpenAddGrade)
 
@@ -63,13 +73,34 @@ class GradesActivity : AppCompatActivity() {
             btnAddGrade.visibility = View.GONE
         }
 
-
         loadGrades()
     }
 
     private fun loadGrades() {
         lifecycleScope.launch {
-            val grades = db.appDao().getGradesForDiscipline(disciplineId)
+            val rawGrades = db.appDao().getGradesForDiscipline(disciplineId)
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+            val grades = when (currentSortOrder) {
+                SortOrder.NEWEST -> rawGrades.sortedWith(
+                    compareByDescending<Grade> { parseDateMillis(it.date, dateFormat) }
+                        .thenByDescending { it.id }
+                )
+                SortOrder.OLDEST -> rawGrades.sortedWith(
+                    compareBy<Grade> { parseDateMillis(it.date, dateFormat) }
+                        .thenBy { it.id }
+                )
+                SortOrder.ASCENDING -> rawGrades.sortedWith(
+                    compareBy<Grade> { it.value }
+                        .thenByDescending { it.id }
+                )
+                SortOrder.DESCENDING -> rawGrades.sortedWith(
+                    compareByDescending<Grade> { it.value }
+                        .thenByDescending { it.id }
+                )
+            }
+
+
             gridGrades.removeAllViews()
 
             if (grades.isEmpty()) {
@@ -83,7 +114,7 @@ class GradesActivity : AppCompatActivity() {
             val avg = grades.map { it.value }.average()
             tvAvg.text = String.format(Locale.US, "%.2f", avg)
 
-            // Отрисовка плиток с оценками (как на макете)
+            // Отрисовка плиток с оценками
             val sizePx = (56 * resources.displayMetrics.density).toInt()
             val marginPx = (6 * resources.displayMetrics.density).toInt()
 
@@ -102,7 +133,6 @@ class GradesActivity : AppCompatActivity() {
                         setMargins(marginPx, marginPx, marginPx, marginPx)
                     }
 
-                    // Нажатие на плитку -> окно "Что делаем?"
                     setOnClickListener { showGradeActionsDialog(grade) }
                 }
                 gridGrades.addView(tvTile)
@@ -110,7 +140,73 @@ class GradesActivity : AppCompatActivity() {
         }
     }
 
-    // Окно просмотра деталей, редактирования и удаления (как на 7-м фото)
+    private fun parseDateMillis(dateStr: String, format: SimpleDateFormat): Long {
+        return try {
+            format.parse(dateStr)?.time ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+    }
+
+    private fun showSortDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_sort_grades, null)
+
+        val rowNewest = dialogView.findViewById<LinearLayout>(R.id.rowSortNewest)
+        val rowOldest = dialogView.findViewById<LinearLayout>(R.id.rowSortOldest)
+        val rowAsc = dialogView.findViewById<LinearLayout>(R.id.rowSortAsc)
+        val rowDesc = dialogView.findViewById<LinearLayout>(R.id.rowSortDesc)
+
+        val ivNewest = dialogView.findViewById<ImageView>(R.id.ivCheckNewest)
+        val ivOldest = dialogView.findViewById<ImageView>(R.id.ivCheckOldest)
+        val ivAsc = dialogView.findViewById<ImageView>(R.id.ivCheckAsc)
+        val ivDesc = dialogView.findViewById<ImageView>(R.id.ivCheckDesc)
+
+        val btnSave = dialogView.findViewById<Button>(R.id.btnSortSave)
+
+        var selectedOrder = currentSortOrder
+
+        fun updateCheckboxes() {
+            ivNewest.setImageResource(if (selectedOrder == SortOrder.NEWEST) R.drawable.ic_check_pink else 0)
+            ivOldest.setImageResource(if (selectedOrder == SortOrder.OLDEST) R.drawable.ic_check_pink else 0)
+            ivAsc.setImageResource(if (selectedOrder == SortOrder.ASCENDING) R.drawable.ic_check_pink else 0)
+            ivDesc.setImageResource(if (selectedOrder == SortOrder.DESCENDING) R.drawable.ic_check_pink else 0)
+        }
+
+        updateCheckboxes()
+
+        rowNewest.setOnClickListener {
+            selectedOrder = SortOrder.NEWEST
+            updateCheckboxes()
+        }
+        rowOldest.setOnClickListener {
+            selectedOrder = SortOrder.OLDEST
+            updateCheckboxes()
+        }
+        rowAsc.setOnClickListener {
+            selectedOrder = SortOrder.ASCENDING
+            updateCheckboxes()
+        }
+        rowDesc.setOnClickListener {
+            selectedOrder = SortOrder.DESCENDING
+            updateCheckboxes()
+        }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        btnSave.setOnClickListener {
+            currentSortOrder = selectedOrder
+            loadGrades()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
+    // Окно просмотра деталей, редактирования и удаления
     private fun showGradeActionsDialog(grade: Grade) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_grade_actions, null)
 
@@ -133,7 +229,6 @@ class GradesActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-        // Убираем стандартный белый фон системного окна
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         btnEdit.setOnClickListener {
@@ -167,15 +262,12 @@ class GradesActivity : AppCompatActivity() {
             confirmDialog.show()
         }
 
-
         btnCancel.setOnClickListener {
             dialog.dismiss()
         }
 
         dialog.show()
     }
-
-
     // Форма создания и редактирования оценки с валидацией
     private fun showGradeFormDialog(existingGrade: Grade?) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_grade_form, null)
@@ -186,7 +278,6 @@ class GradesActivity : AppCompatActivity() {
         val btnCancel = dialogView.findViewById<Button>(R.id.btnDialogCancel)
         val btnSave = dialogView.findViewById<Button>(R.id.btnDialogSave)
 
-        // Адаптер для Spinner, чтобы текст внутри тёмной капсулы был розовым и по центру
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, workTypes) {
             override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View {
                 val tv = super.getView(position, convertView, parent) as TextView
@@ -215,7 +306,6 @@ class GradesActivity : AppCompatActivity() {
             .setView(dialogView)
             .create()
 
-        // Делаем стандартный белый фон системного окна прозрачным
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         btnCancel.setOnClickListener {
@@ -267,3 +357,4 @@ class GradesActivity : AppCompatActivity() {
     }
 
 }
+// Форма создания и редактирования оценки с валидацией

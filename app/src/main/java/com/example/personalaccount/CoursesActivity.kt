@@ -39,7 +39,7 @@ class CoursesActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        loadCoursesWithAvg() // Обновляем список и средние баллы при возврате на экран
+        loadCoursesWithAvg()
     }
 
     private fun loadCoursesWithAvg() {
@@ -55,22 +55,38 @@ class CoursesActivity : AppCompatActivity() {
 
             for (course in courses) {
                 val grades = db.appDao().getGradesForDiscipline(course.id)
-                val avgText = if (grades.isEmpty()) {
+                val avg = if (grades.isEmpty()) null else grades.map { it.value }.average()
+                val avgText = if (avg == null) {
                     "-"
                 } else {
-                    val avg = grades.map { it.value }.average()
                     String.format(Locale.US, "%.2f", avg)
                 }
 
                 val view = LayoutInflater.from(this@CoursesActivity)
                     .inflate(R.layout.item_course_avg, llContainer, false)
 
+                val tvAvg = view.findViewById<TextView>(R.id.tvCourseAvg)
+                tvAvg.text = avgText
+
+                // Подсветка карточки и цифр среднего балла при балле <= 3.5
+                if (avg != null && avg <= 3.5) {
+                    view.setBackgroundResource(R.drawable.bg_low_score_rounded)
+                    tvAvg.setTextColor(androidx.core.content.ContextCompat.getColor(this@CoursesActivity, R.color.low_score_red))
+                } else {
+                    view.setBackgroundResource(R.drawable.bg_pink_rounded)
+                    tvAvg.setTextColor(androidx.core.content.ContextCompat.getColor(this@CoursesActivity, R.color.pink_accent))
+                }
+
+                view.findViewById<TextView>(R.id.tvCourseTitle).text = course.name
+                view.findViewById<TextView>(R.id.tvCourseTeacher).text =
+                    course.teacherName ?: "Преподаватель не указан"
+
+
                 view.findViewById<TextView>(R.id.tvCourseTitle).text = course.name
                 view.findViewById<TextView>(R.id.tvCourseTeacher).text =
                     course.teacherName ?: "Преподаватель не указан"
                 view.findViewById<TextView>(R.id.tvCourseAvg).text = avgText
 
-                // Переход к экрану выбранной дисциплины
                 val isAddMode = intent.getBooleanExtra("IS_ADD_MODE", false)
 
                 view.setOnClickListener {
@@ -81,7 +97,6 @@ class CoursesActivity : AppCompatActivity() {
                     intent.putExtra("IS_ADD_MODE", isAddMode)
                     startActivity(intent)
                 }
-
 
                 llContainer.addView(view)
             }
