@@ -47,7 +47,7 @@
         android:hint="Название"
         android:inputType="textCapSentences"
         android:textColor="@color/dark_bg"
-        android:textColorHint="@color/dark_bg"
+        android:textColorHint="@color/dark_bg_E6"
         android:textStyle="bold" />
 
     <!-- Поле: Преподаватель -->
@@ -63,7 +63,7 @@
         android:hint="Преподаватель"
         android:inputType="textPersonName|textCapWords"
         android:textColor="@color/dark_bg"
-        android:textColorHint="@color/dark_bg"
+        android:textColorHint="@color/dark_bg_E6"
         android:textStyle="bold" />
 
     <!-- Кнопка: Добавить дисциплину -->

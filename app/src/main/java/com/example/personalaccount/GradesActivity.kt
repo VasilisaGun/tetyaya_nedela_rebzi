@@ -288,7 +288,7 @@ class GradesActivity : AppCompatActivity() {
                 return tv
             }
         }
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
         spinnerType.adapter = adapter
 
         if (existingGrade != null) {

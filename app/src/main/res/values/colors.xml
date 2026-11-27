@@ -3,7 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="pink_accent">#CE40C2</color>
+    <color name="pink_accent_E6">#B3CE40C2</color>
     <color name="dark_bg">#201E30</color>
-    <color name="dark_bg_E6">#E6201E30</color>
+    <color name="dark_bg_E6">#B3201E30</color>
     <color name="low_score_red">#AB2E62</color>
 </resources>
